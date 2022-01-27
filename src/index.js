@@ -316,7 +316,7 @@ app.get('/getInformationbydate2', (req, res) => {
 
             const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
             let ans = [];
-            for(let i = 0; i < 23; i++) {
+            for(let i = 0; i < 24; i++) {
                 let count = 0
                 let humidity = 0
                 let temperature = 0
