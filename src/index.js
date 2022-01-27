@@ -25,7 +25,7 @@ const client = mqtt.connect(connectUrl, {
     reconnectPeriod: 1000,
 })
 
-var topic = "/topic/qos1"
+var topic = "/topic/qos2"
 
 
 // const uri = "mongodb+srv://iothust:iothust@iothust.ty0uf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
@@ -42,10 +42,7 @@ client.on('message', (topic, message) => {
         pm25: jsonData.data.pm2_5,
         pm10: jsonData.data.pm10,
         so2: jsonData.data.so2,
-        no: null,
-        nox: null,
         no2: jsonData.data.no2,
-        o3: null,
         co: jsonData.data.co,
 
     });
@@ -61,6 +58,7 @@ client.on('message', (topic, message) => {
             data: {
                 temperature: jsonData.data.temperature,
                 humidity: jsonData.data.humidity,
+                aqi: Math.floor(Math.random() * 50) + 50,
                 location: { latitude: jsonData.data.location.latitude, longitude: jsonData.data.location.longitude },
                 time: jsonData.data.time,
                 // co: jsonData.data.co,
@@ -88,6 +86,7 @@ client.on('connect', () => {
 
 const PORT = 8000;
 
+
 app.use(express.json());
 
 app.get('/', (req, res) => res.send('IOT HUST'));
@@ -95,7 +94,7 @@ app.get('/', (req, res) => res.send('IOT HUST'));
 app.listen(PORT, () => {
     console.log(`⚡️[server]: Server is running at localhost:${PORT}`);
 });
-
+// lay thong tin theo deviceid
 app.get('/getInformation', (req, res) => {
 
     const jsonBody = req.body;
@@ -115,7 +114,7 @@ app.get('/getInformation', (req, res) => {
                         temperature: snap.data.temperature,
                         location: snap.data.location,
                         time: snap.data.time,
-                        aqi: null,
+                        aqi: jsonData.data.aqi,
                         polutants: {
                             // co: snap.data.co,
                             // no2: snap.data.no2,
@@ -135,7 +134,7 @@ app.get('/getInformation', (req, res) => {
         });
     });
 });
-
+// lay thong tin theo deviceid va ngay thang
 app.get('/getInformationbydate', (req, res) => {
 
     const jsonBody = req.body;
@@ -145,11 +144,10 @@ app.get('/getInformationbydate', (req, res) => {
     mongc.connect((error, client) => {
         var mCol = client.db('mqttIOT').collection('sensor')
         mCol.find({ deviceId: jsonBody.deviceId }).toArray(function (err, result) {
-            console.log(result);
+    
             if (err) throw err;
             let jsonRes = []
             const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
-            console.log(datetime);
             result.forEach(snap => {
                 const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss")
                 
@@ -160,7 +158,7 @@ app.get('/getInformationbydate', (req, res) => {
                             temperature: snap.data.temperature,
                             location: snap.data.location,
                             time: snap.data.time,
-                            aqi: null,
+                            aqi: jsonData.data.aqi,
                             polutants: {
                                 // co: snap.data.co,
                                 // no2: snap.data.no2,
@@ -181,6 +179,7 @@ app.get('/getInformationbydate', (req, res) => {
         });
     });
 });
+// lay trung binh 1 ngay 
 app.get('/getInformationbydate1', (req, res) => {
 
     const jsonBody = req.body;
@@ -197,7 +196,7 @@ app.get('/getInformationbydate1', (req, res) => {
             let aqi = 0
             let co = 0
             let co2 = 0
-            let so2 = 0
+            // let so2 = 0
             let pm2_5 = 0
             let pm10 = 0
             let location = ""
@@ -211,7 +210,7 @@ app.get('/getInformationbydate1', (req, res) => {
                     temperature += snap.data.temperature
                     location = snap.data.location
                     time = snap.data.time
-                    aqi = null
+                    aqi=snap.data.aqi
                     co += snap.data.co
                     co2 += snap.data.co2
                     // so2 += snap.data.so2
@@ -240,7 +239,8 @@ app.get('/getInformationbydate1', (req, res) => {
         });
     });
 });
-app.get('/getInformationbydate2', (req, res) => {
+// lay trung binh 1 h
+app.get('/getInformationbyhour', (req, res) => {
 
     const jsonBody = req.body;
 
@@ -255,8 +255,8 @@ app.get('/getInformationbydate2', (req, res) => {
             let temperature = 0
             let aqi = 0
             let co = 0
-            let no2 = 0
-            let so2 = 0
+            let co2 = 0
+            // let so2 = 0
             let pm2_5 = 0
             let pm10 = 0
             let location = ""
@@ -274,8 +274,8 @@ app.get('/getInformationbydate2', (req, res) => {
                     time = snap.data.time
                     aqi = null
                     co += snap.data.co
-                    no2 += snap.data.no2
-                    so2 += snap.data.so2
+                    co2 += snap.data.co2
+                    // so2 += snap.data.so2
                     pm2_5 += snap.data.pm2_5
                     pm10 += snap.data.pm10
                     count++
@@ -290,12 +290,83 @@ app.get('/getInformationbydate2', (req, res) => {
                     aqi: aqi,
                     polutants: {
                         co: co / count,
-                        no2: no2 / count,
-                        so2: so2 / count,
+                        co2: co2 / count,
+                        // so2: so2 / count,
                         pm2_5: pm2_5 / count,
                         pm10: pm10 / count
                     }
                 }
+            })
+            client.close();
+        });
+    });
+});
+// lay tb 24h cua 1 ngay 
+app.get('/getInformationbydate2', (req, res) => {
+
+    const jsonBody = req.body;
+
+  
+
+    mongc.connect((error, client) => {
+        var mCol = client.db('mqttIOT').collection('sensor')
+        mCol.find({ deviceId: jsonBody.deviceId }).toArray(function (err, result) {
+            if (err) throw err;
+            
+
+            const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
+            let ans = [];
+            for(let i = 0; i < 23; i++) {
+                let count = 0
+                let humidity = 0
+                let temperature = 0
+                let aqi = 0
+                let co = 0
+                let co2 = 0
+                let so2 = 0
+                let pm2_5 = 0
+                let pm10 = 0
+                let location = ""
+                let time = ""
+                
+                result.forEach(snap => {
+                    const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss")
+                    if (snapDatetime.day() === datetime.day()) {
+                        
+                        if(snapDatetime.hour() === i) {
+                            humidity += snap.data.humidity
+                            temperature += snap.data.temperature
+                            location = snap.data.location
+                            time = snap.data.time
+                            aqi = snap.data.aqi
+                            co += snap.data.co
+                            co2 += snap.data.co2
+                            // so2 += snap.data.so2
+                            pm2_5 += snap.data.pm2_5
+                            pm10 += snap.data.pm10
+                            count++
+                        }
+                    }
+                })
+                ans.push(
+                    {
+                        humidity: humidity / count,
+                        temperature: temperature / count,
+                        location: location,
+                        time: time,
+                        aqi: aqi,
+                        polutants: {
+                            co: co / count,
+                            co2: co2 / count,
+                            // so2: so2 / count,
+                            pm2_5: pm2_5 / count,
+                            pm10: pm10 / count
+                        }
+                    }
+                )
+            }
+            res.json({
+                data: ans
             })
             client.close();
         });
@@ -324,7 +395,7 @@ app.get('/getinformationtimeto', (req, res) => {
                             temperature: snap.data.temperature,
                             location: snap.data.location,
                             time: snap.data.time,
-                            aqi: null,
+                            aqi: snap.data.aqi,
                             polutants: {
                                 // co: snap.data.co,
                                 // no2: snap.data.no2,
