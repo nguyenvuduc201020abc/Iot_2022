@@ -180,65 +180,65 @@
 //         });
 //     });
 // });
-// app.get('/getInformationbydate1', (req, res) => {
+app.get('/getInformationbydate1', (req, res) => {
 
-//     const jsonBody = req.body;
+    const jsonBody = req.body;
 
-//     console.log(jsonBody)
+    console.log(jsonBody)
 
-//     mongc.connect((error, client) => {
-//         var mCol = client.db('mqttIOT').collection('sensor')
-//         mCol.find({ deviceId: jsonBody.deviceId }).toArray(function (err, result) {
-//             if (err) throw err;
-//             let count = 0
-//             let humidity = 0
-//             let temperature = 0
-//             let aqi = 0
-//             let co = 0
-//             let co2 = 0
-//             let so2 = 0
-//             let pm2_5 = 0
-//             let pm10 = 0
-//             let location = ""
-//             let time = ""
+    mongc.connect((error, client) => {
+        var mCol = client.db('mqttIOT').collection('sensor')
+        mCol.find({ deviceId: jsonBody.deviceId }).toArray(function (err, result) {
+            if (err) throw err;
+            let count = 0
+            let humidity = 0
+            let temperature = 0
+            let aqi = 0
+            let co = 0
+            let co2 = 0
+            let so2 = 0
+            let pm2_5 = 0
+            let pm10 = 0
+            let location = ""
+            let time = ""
 
-//             const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
-//             result.forEach(snap => {
-//                 const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss")
-//                 if (snapDatetime.isSame(datetime, 'day')) {
-//                     humidity += snap.data.humidity
-//                     temperature += snap.data.temperature
-//                     location = snap.data.location
-//                     time = snap.data.time
-//                     aqi = null
-//                     co += snap.data.co
-//                     co2 += snap.data.co2
-//                     // so2 += snap.data.so2
-//                     pm2_5 += snap.data.pm2_5
-//                     pm10 += snap.data.pm10
-//                     count++
-//                 }
-//             })
-//             res.json({
-//                 data: {
-//                     humidity: humidity / count,
-//                     temperature: temperature / count,
-//                     location: location,
-//                     time: time,
-//                     aqi: aqi,
-//                     polutants: {
-//                         co: co / count,
-//                         co2: co2 / count,
-//                         // so2: so2 / count,
-//                         pm2_5: pm2_5 / count,
-//                         pm10: pm10 / count
-//                     }
-//                 }
-//             })
-//             client.close();
-//         });
-//     });
-// });
+            const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
+            result.forEach(snap => {
+                const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss")
+                if (snapDatetime.isSame(datetime, 'day')) {
+                    humidity += snap.data.humidity
+                    temperature += snap.data.temperature
+                    location = snap.data.location
+                    time = snap.data.time
+                    aqi = null
+                    co += snap.data.co
+                    co2 += snap.data.co2
+                    // so2 += snap.data.so2
+                    pm2_5 += snap.data.pm2_5
+                    pm10 += snap.data.pm10
+                    count++
+                }
+            })
+            res.json({
+                data: {
+                    humidity: humidity / count,
+                    temperature: temperature / count,
+                    location: location,
+                    time: time,
+                    aqi: aqi,
+                    polutants: {
+                        co: co / count,
+                        co2: co2 / count,
+                        // so2: so2 / count,
+                        pm2_5: pm2_5 / count,
+                        pm10: pm10 / count
+                    }
+                }
+            })
+            client.close();
+        });
+    });
+});
 // app.get('/getInformationbydate2', (req, res) => {
 
 //     const jsonBody = req.body;
