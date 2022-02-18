@@ -1,4 +1,5 @@
-//MQTT
+
+// MQTT
 var mqtt = require('mqtt')
 //mongoDB
 const { MongoClient } = require('mongodb');
@@ -29,7 +30,7 @@ var topic = "/topic/qos2"
 
 
 // const uri = "mongodb+srv://iothust:iothust@iothust.ty0uf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-const uri = "mongodb://localhost:27017";
+const uri = "mongodb://13.212.177.8:27017";
 const mongc = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 client.on('message', (topic, message) => {
@@ -37,17 +38,20 @@ client.on('message', (topic, message) => {
     jsonData = JSON.parse(message)
     console.log()
 
-    const AQI = aqiCalculator({
-        datetime: jsonData.data.time,
-        pm25: jsonData.data.pm2_5,
-        pm10: jsonData.data.pm10,
-        so2: jsonData.data.so2,
-        no2: jsonData.data.no2,
-        co: jsonData.data.co,
+    // const AQI = aqiCalculator({
+    //     datetime: jsonData.data.time,
+    //     pm25: jsonData.data.pm2_5,
+    //     pm10: jsonData.data.pm10,
+    //     so2: jsonData.data.so2,
+    //     no: null,
+    //     nox: null,
+    //     no2: jsonData.data.no2,
+    //     o3: null,
+    //     co: jsonData.data.co,
 
-    });
+    // });
 
-    console.log(AQI);
+    // console.log(AQI);
 
     mongc.connect((error, client) => {
         var mCol = client.db('mqttIOT').collection('sensor')
@@ -86,7 +90,6 @@ client.on('connect', () => {
 
 const PORT = 8000;
 
-
 app.use(express.json());
 
 app.get('/', (req, res) => res.send('IOT HUST'));
@@ -94,91 +97,46 @@ app.get('/', (req, res) => res.send('IOT HUST'));
 app.listen(PORT, () => {
     console.log(`⚡️[server]: Server is running at localhost:${PORT}`);
 });
-// lay thong tin theo deviceid
-// app.get('/getInformation', (req, res) => {
 
-//     const jsonBody = req.body;
+app.get('/getInformation', (req, res) => {
 
-//     console.log(jsonBody)
+    const jsonBody = req.body;
 
-//     mongc.connect((error, client) => {
-//         var mCol = client.db('mqttIOT').collection('sensor')
-//         mCol.find({ deviceId: jsonBody.deviceId }).toArray(function (err, result) {
-//             if (err) throw err;
-//             let jsonRes = []
-//             result.forEach(snap => {
-//                 console.log(snap);
-//                 jsonRes.push({
-//                     data: {
-//                         humidity: snap.data.humidity,
-//                         temperature: snap.data.temperature,
-//                         location: snap.data.location,
-//                         time: snap.data.time,
-//                         aqi: jsonData.data.aqi,
-//                         polutants: {
-//                             // co: snap.data.co,
-//                             // no2: snap.data.no2,
-//                             // so2: snap.data.so2,
-//                             // pm2_5: snap.data.pm2_5,
-//                             // pm10: snap.data.pm10
-//                             co: snap.data.co,
-//                             co2: snap.data.co2,
-//                             pm2_5: snap.data.pm2_5,
-//                             pm10: snap.data.pm10
-//                         }
-//                     }
-//                 })
-//             })
-//             res.json(jsonRes)
-//             client.close();
-//         });
-//     });
-// });
-// lay thong tin theo deviceid va ngay thang
-// app.get('/getInformationbydate', (req, res) => {
+    console.log(jsonBody)
 
-//     const jsonBody = req.body;
-
-//     console.log(jsonBody)
-
-//     mongc.connect((error, client) => {
-//         var mCol = client.db('mqttIOT').collection('sensor')
-//         mCol.find({ deviceId: jsonBody.deviceId }).toArray(function (err, result) {
-    
-//             if (err) throw err;
-//             let jsonRes = []
-//             const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
-//             result.forEach(snap => {
-//                 const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss")
-                
-//                 if (snapDatetime.isSame(datetime, 'day')) {
-//                     jsonRes.push({
-//                         data: {
-//                             humidity: snap.data.humidity,
-//                             temperature: snap.data.temperature,
-//                             location: snap.data.location,
-//                             time: snap.data.time,
-//                             aqi: jsonData.data.aqi,
-//                             polutants: {
-//                                 // co: snap.data.co,
-//                                 // no2: snap.data.no2,
-//                                 // so2: snap.data.so2,
-//                                 // pm2_5: snap.data.pm2_5,
-//                                 // pm10: snap.data.pm10
-//                                 co: snap.data.co,
-//                                 co2: snap.data.co2,
-//                                 pm2_5: snap.data.pm2_5,
-//                                 pm10: snap.data.pm10
-//                             }
-//                         }
-//                     })
-//                 }
-//             })
-//             res.json(jsonRes)
-//             client.close();
-//         });
-//     });
-// }); 
+    mongc.connect((error, client) => {
+        var mCol = client.db('mqttIOT').collection('sensor')
+        mCol.find({ deviceId: jsonBody.deviceId }).toArray(function (err, result) {
+            if (err) throw err;
+            let jsonRes = []
+            result.forEach(snap => {
+                console.log(snap);
+                jsonRes.push({
+                    data: {
+                        humidity: snap.data.humidity,
+                        temperature: snap.data.temperature,
+                        location: snap.data.location,
+                        time: snap.data.time,
+                        aqi: snap.data.aqi,
+                        polutants: {
+                            // co: snap.data.co,
+                            // no2: snap.data.no2,
+                            // so2: snap.data.so2,
+                            // pm2_5: snap.data.pm2_5,
+                            // pm10: snap.data.pm10
+                            co: snap.data.co,
+                            co2: snap.data.co2,
+                            pm2_5: snap.data.pm2_5,
+                            pm10: snap.data.pm10
+                        }
+                    }
+                })
+            })
+            res.json(jsonRes)
+            client.close();
+        });
+    });
+});
 app.get('/getInformationbydate', (req, res) => {
 
     const jsonBody = req.body;
@@ -202,7 +160,7 @@ app.get('/getInformationbydate', (req, res) => {
                             temperature: snap.data.temperature,
                             location: snap.data.location,
                             time: snap.data.time,
-                            aqi: null,
+                            aqi: snap.data.aqi,
                             polutants: {
                                 // co: snap.data.co,
                                 // no2: snap.data.no2,
@@ -316,7 +274,7 @@ app.get('/getInformationbyhour', (req, res) => {
                     temperature += snap.data.temperature
                     location = snap.data.location
                     time = snap.data.time
-                    aqi = null
+                    aqi = snap.data.aqi
                     co += snap.data.co
                     co2 += snap.data.co2
                     // so2 += snap.data.so2
@@ -430,7 +388,17 @@ app.get('/getInformationbymonth', (req, res) => {
 
             const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
             let ans = [];
-            for(let i = 1; i < 29; i++) {
+            var a;
+            if(datetime.month()+1==1||datetime.month()+1==3||datetime.month()+1==5||datetime.month()+1==7||datetime.month()+1==8||datetime.month()+1==10||datetime.month()+1==12){
+                a=31;
+            }
+            else if(datetime.month()+1==2){
+                a=28;
+            }
+            else a=30;
+            console.log(datetime.month());
+            {
+            for(let i = 1; i <= a; i++) {
                 let count = 0
                 let humidity = 0
                 let temperature = 0
@@ -446,8 +414,8 @@ app.get('/getInformationbymonth', (req, res) => {
                 result.forEach(snap => {
                     const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss")
                     if (snapDatetime.month() === datetime.month()) {
-                        
-                        if(snapDatetime.day() === i) {
+                        if(snapDatetime.date() === i) {
+                        // if(snapDatetime.isSame(datetime, i)) { 
                             humidity += snap.data.humidity
                             temperature += snap.data.temperature
                             location = snap.data.location
@@ -482,7 +450,7 @@ app.get('/getInformationbymonth', (req, res) => {
             res.json({
                 data: ans
             })
-            client.close();
+            client.close();}
         });
     });
 });
@@ -610,3 +578,43 @@ app.get('/getInformationbytype', (req, res) => {
         });
     });
 });
+app.post('/device/add', (req, res) => {
+
+    const jsonBody = req.body;
+
+    console.log(jsonBody)
+
+    mongc.connect((error, client) => {
+        var mCol = client.db('mqttIOT').collection('deviceId')
+        mCol.insertOne(jsonBody,(err,result)=>
+        {
+            if(err) throw err;
+            console.log("them thanh cong")
+            res.send("them thanh cong")
+            client.close();
+        }
+
+        )      
+        });
+    });
+app.get('/device/get', (req, res) => {
+        mongc.connect((error, client) => {
+            var mCol = client.db('mqttIOT').collection('deviceId')
+            mCol.find().toArray((err,obj)=>{
+                if(err) throw err;
+                if(obj.length !=0) console.log("lay du lieu thanh cong");
+                res.send(obj);
+                client.close();
+            })
+               
+            });
+        });
+app.put('/device/put/:deviceId', (req, res) => {
+            mongc.connect((error, client) => {
+                var mCol = client.db('mqttIOT').collection('deviceId')
+                var newId = mCol.find(mCol => mCol.deviceId == req.params.deviceId)
+                console.log(newId);
+                });
+            });
+
+
